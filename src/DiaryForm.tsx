@@ -49,7 +49,7 @@ export const DiaryForm = () => {
       const comment = data.choices?.[0]?.message?.content || 'AIコメント取得失敗';
       setReply(comment);
 
-      await addDoc(collection(db, 'diaries'), {
+      await addDoc(collection(db, 'users', userId, 'entries'), { ... })
         content: text,
         gptComment: comment,
         createdAt: Timestamp.now()
