@@ -4,34 +4,37 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import { Login } from './Login';
 import { DiaryForm } from './DiaryForm';
-import { DiaryLogs } from './DiaryLogs'; 
+import { DiaryLogs } from './DiaryLogs';
 import { DiaryLogsGrouped } from './DiaryLogsGrouped';
-
-<Route path="/logs-grouped" element={<DiaryLogsGrouped />} />
-
+import { Auth } from './Auth';
 
 function App() {
-  const [user, setUser] = useState<any>(null);
+  import type { User } from 'firebase/auth';
+const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (u) => setUser(u));
-  }, []);
+  const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
+  return () => unsubscribe();
+}, []);
 
   if (!user) return <Login />;
 
   return (
     <Router>
-<nav style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-        <Link to="/">日記を書く</Link>
-        <Link to="/logs">一覧</Link>
-        <Link to="/logs-grouped">月日別</Link>
-</nav>
+      <div style={{ padding: '2rem' }}>
+        <Auth user={user} setUser={setUser} />
+        <nav style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+          <Link to="/">日記を書く</Link>
+          <Link to="/logs">一覧</Link>
+          <Link to="/logs-grouped">月日別</Link>
+        </nav>
 
-      <Routes>
-        <Route path="/" element={<DiaryForm />} />
-        <Route path="/logs" element={<DiaryLogs />} />
-        <Route path="/logs-grouped" element={<DiaryLogsGrouped />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<DiaryForm user={user} />} />
+          <Route path="/logs" element={<DiaryLogs />} />
+          <Route path="/logs-grouped" element={<DiaryLogsGrouped />} />
+        </Routes>
+      </div>
     </Router>
   );
 }
